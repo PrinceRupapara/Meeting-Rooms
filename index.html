@@ -25,7 +25,7 @@
                             <h5 class="mb-0">Rooms Add / Edit</h5>
                             <small class="text-muted">Create or update rooms</small>
                         </div>
-                        
+
                     </div>
 
                     <form id="roomForm" class="mb-3">
@@ -34,11 +34,15 @@
                                 <label for="roomName" class="form-label">Name</label>
                                 <input id="roomName" type="text" class="form-control" placeholder="Enter room name"
                                     required />
-                            </div>
+                             </div>
                             <div class="col-6">
                                 <label for="roomCap" class="form-label">Capacity</label>
                                 <input id="roomCap" type="number" min="1" value="10" class="form-control"
                                     placeholder="Capacity" required />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Cleaning Time</label>
+                                <input type="text" id="cleaningTime" placeholder="13:00 - 14:00" class="form-control" />
                             </div>
                         </div>
 
@@ -50,12 +54,10 @@
                     </form>
 
                     <hr />
-
                     <div>
                         <div class="d-flex control-row mb-2">
                             <label class="me-2 text-muted fw-semibold mb-0">Filter by capacity:</label>
                             <select id="filterCapacity" class="form-select form-select-sm w-auto m-1 me-2">
-
                             </select>
 
                             <input id="searchRoom" class="form-control form-control-sm ms-auto m-1"
@@ -114,7 +116,12 @@
                         </div>
                     </form>
                     <hr />
-                    <div id="bookingsList"></div>
+                    <div>
+                        <h5>Todays Bookings</h5>
+                        <div id="todayBookedRoom" class="mt-2"></div>
+                    </div>
+
+
                 </div>
             </div>
             <div class="col-lg-4">
@@ -138,16 +145,16 @@
                 <div class="card shadow-sm border border-secondary p-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div>
-                            <h5 class="mb-0">Today Booked Rooms</h5>
-                            
-                        </div>
-                        <!-- <div>
-                            <button class="btn btn-sm btn-outline-primary" id="viewDateBtn"><i class="bi bi-calendar-event"></i> Celender</button>
-                            <input id="datePicker" type="date" style="display:none" />
-                        </div> -->
-                    </div>
+                            <h5 class="mb-0">Bookings</h5>
 
-                    <div id="todayBookedRoom" class="mt-2"></div>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" id="viewBookingDateBtn"><i
+                                    class="bi bi-calendar-event"></i> Celender</button>
+                            <input id="datePicker" type="date" class="form-control " style="display:none" />
+                        </div>
+                    </div>
+                    <div id="bookingsList" class="mt-2"></div>
                 </div>
             </div>
         </div>
@@ -155,7 +162,11 @@
 
 
 
-    <script src="./js/script.js"></script>
+    <!-- <script src="./js/script.js"></script> -->
+    <script src="rooms.js"></script>
+    <script src="bookings.js"></script>
+    <script src="filter.js"></script>
+    <script src="utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
