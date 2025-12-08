@@ -1,0 +1,24 @@
+{
+  "name": "meeting-rooms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bookings.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PrinceRupapara/Meeting-Rooms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PrinceRupapara/Meeting-Rooms/issues"
+  },
+  "homepage": "https://github.com/PrinceRupapara/Meeting-Rooms#readme",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
