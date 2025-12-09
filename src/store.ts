@@ -10,19 +10,20 @@ export interface Booking {
 }
 
 export interface Room {
-    id : number,
-    name : string,
-    capacity : number,
-    cleaningTime? :   number  | string
-}
+    id: number,
+    name: string,
+    capacity: number,
+    cleaningStartTime: string,
+    cleaningEndTime: string,
 
+}
 
 export let bookings: Booking[] = JSON.parse(localStorage.getItem('bookingData') ?? '[]') || [];
 
-export function saveBookingStorage(){
-     localStorage.setItem('bookingData', JSON.stringify(bookings));
+export function saveBookingStorage() {
+    localStorage.setItem('bookingData', JSON.stringify(bookings));
 }
 
-export function saveRoomStorage(){
+export function saveRoomStorage() {
     localStorage.setItem('roomData', JSON.stringify(rooms));
 }

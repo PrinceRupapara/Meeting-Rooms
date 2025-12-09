@@ -2,8 +2,12 @@
   "name": "meeting-rooms",
   "version": "1.0.0",
   "description": "",
-  "main": "bookings.js",
   "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "serve": "http-server ./ -o -c-1",
+    "dev": "concurrently \"npm run watch\" \"npm run serve\"",
+    "start": "npm run build && npm run serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +23,8 @@
   },
   "homepage": "https://github.com/PrinceRupapara/Meeting-Rooms#readme",
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "concurrently": "^8.2.0",
+    "http-server": "^14.1.1"
   }
 }

@@ -1,16 +1,16 @@
-import { rooms } from "./rooms.js";
-import {  editBooking, deleteBooking} from "./bookings.js";
-import { localTodayISO , timeToMinutes } from "./utils.js";
-import { bookings,type Booking } from "./store.js";
+import { rooms, saveToLocalstorage } from "./rooms.js";
+import { editBooking, deleteBooking, renderBooking } from "./bookings.js";
+import { localTodayISO, timeToMinutes } from "./utils.js";
+import { bookings, type Booking } from "./store.js";
 
 
 const filterBooking = document.getElementById("filterBooking") as HTMLSelectElement || null;
 const selectedRoomTitle = document.getElementById('selectedRoomTitle') as HTMLDivElement || null;
 const selectedRoomBookings = document.getElementById('selectedRoomBookings') as HTMLDivElement || null;
-const todayBookedRoom = document.getElementById("todayBookedRoom")as HTMLDivElement || null;
+const todayBookedRoom = document.getElementById("todayBookedRoom") as HTMLDivElement || null;
 const viewBookingDateBtn = document.getElementById("viewBookingDateBtn") as HTMLButtonElement || null;
 const datePicker = document.getElementById("datePicker") as HTMLInputElement || null;
-const bookingsList = document.getElementById("bookingsList")as HTMLDivElement || null;
+const bookingsList = document.getElementById("bookingsList") as HTMLDivElement || null;
 
 export function bookingFilterDropdown() {
     if (!filterBooking) return;
@@ -32,14 +32,15 @@ export function bookingFilterDropdown() {
 
 }
 
-export function selectRoom(id: number | string)  {
+export function selectRoom(id: number) {
     if (!id) {
         selectedRoomTitle.textContent = 'Choose a room to view its bookings';
         selectedRoomBookings.innerHTML = '';
+        // selectedRoomTitle.innerHTML = '';
         return;
     }
 
-    const roomBookings = bookings.filter(b => b.roomId == id).sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
+    const roomBookings = bookings.filter(b => b.roomId === id).sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
     selectedRoomBookings.innerHTML = '';
 
     if (!roomBookings.length) {
@@ -92,14 +93,20 @@ function addFilterEventListners() {
 
 
 filterBooking.addEventListener('change', () => {
-    const val  = filterBooking as HTMLSelectElement;
-    // renderBooking(val);
+    const val = (filterBooking as HTMLSelectElement).value;
+
+    // console.log("filter booking : ", val);
+    // renderBooking(val); 
+    if (val === 'all') {
+        return;
+    }
     if (val) {
         selectRoom(Number(val));
     }
     else {
-        selectedRoomTitle.textContent = 'Choose a room to view its bookings';
+        selectedRoomTitle.textContent = 'Choose a room to view its booking';
         selectedRoomBookings.innerHTML = '';
+        // renderBooking();
     }
 });
 
@@ -142,17 +149,24 @@ export function renderTodayBooking() {
     addFilterEventListners();
 }
 
-export function expiredBookingRemove() {
+export function expiredBookingRemove() : Booking[] {
 
-    const today  = new Date().toISOString().split("T")[0] || '';
+    // console.log("Booking :", bookings.map(b => b.date));
+    const today = new Date();
+    today.setHours(0,0,0,0);
 
-    const validBooking = bookings.filter(t => t.date >= today);
-
-    return validBooking;
+     const booking = bookings.filter(t => {
+        const bookingDate = new Date(t.date);
+        bookingDate.setHours(0,0,0,0);
+        return bookingDate >= today
+    });
+    bookings.splice(0, bookings.length, ...booking);
+    
+    renderBooking();
+    saveToLocalstorage();
+    return bookings;    
 }
 
-// const booking = expiredBookingRemove();
-// console.log(booking);
 
 
 viewBookingDateBtn.addEventListener("click", () => {
@@ -160,16 +174,15 @@ viewBookingDateBtn.addEventListener("click", () => {
     datePicker.focus();
 });
 
-export function viewBookingForDate(date : string) {
+export function viewBookingForDate(date: string) {
     const bookingsDate = bookings.filter(d => d.date === date);
 
-    if(!bookingsList) return;
+    if (!bookingsList) return;
     // todayBookedRoom.innerHTML = '';
     bookingsList.innerHTML = '';
 
-    
+
     if (!bookingsDate.length) {
-        // bookingsList.innerHTML = '<div class = "text-muted"> No Bookings for this date.</div>';
         bookingsList.innerHTML = 'No Bookings for this date.';
     } else {
         bookingsDate.forEach(booknig => {

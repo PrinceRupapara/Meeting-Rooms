@@ -1,6 +1,7 @@
 export type Rooms = {
-    id: number,
+   id: number,
     name: string,
     capacity: number,
-    cleaningTimeVal?: number | string
+    cleaningStartTime: string,
+    cleaningEndTime: string,
 }

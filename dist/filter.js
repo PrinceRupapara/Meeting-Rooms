@@ -1,5 +1,5 @@
-import { rooms } from "./rooms.js";
-import { editBooking, deleteBooking } from "./bookings.js";
+import { rooms, saveToLocalstorage } from "./rooms.js";
+import { editBooking, deleteBooking, renderBooking } from "./bookings.js";
 import { localTodayISO, timeToMinutes } from "./utils.js";
 import { bookings } from "./store.js";
 const filterBooking = document.getElementById("filterBooking") || null;
@@ -28,9 +28,10 @@ export function selectRoom(id) {
     if (!id) {
         selectedRoomTitle.textContent = 'Choose a room to view its bookings';
         selectedRoomBookings.innerHTML = '';
+        // selectedRoomTitle.innerHTML = '';
         return;
     }
-    const roomBookings = bookings.filter(b => b.roomId == id).sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
+    const roomBookings = bookings.filter(b => b.roomId === id).sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
     selectedRoomBookings.innerHTML = '';
     if (!roomBookings.length) {
         selectedRoomBookings.innerHTML = '<div class="muted">No bookings for this room.</div>';
@@ -80,14 +81,19 @@ function addFilterEventListners() {
     });
 }
 filterBooking.addEventListener('change', () => {
-    const val = filterBooking;
-    // renderBooking(val);
+    const val = filterBooking.value;
+    // console.log("filter booking : ", val);
+    // renderBooking(val); 
+    if (val === 'all') {
+        return;
+    }
     if (val) {
         selectRoom(Number(val));
     }
     else {
-        selectedRoomTitle.textContent = 'Choose a room to view its bookings';
+        selectedRoomTitle.textContent = 'Choose a room to view its booking';
         selectedRoomBookings.innerHTML = '';
+        // renderBooking();
     }
 });
 export function renderTodayBooking() {
@@ -123,12 +129,19 @@ export function renderTodayBooking() {
     addFilterEventListners();
 }
 export function expiredBookingRemove() {
-    const today = new Date().toISOString().split("T")[0] || '';
-    const validBooking = bookings.filter(t => t.date >= today);
-    return validBooking;
+    // console.log("Booking :", bookings.map(b => b.date));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const booking = bookings.filter(t => {
+        const bookingDate = new Date(t.date);
+        bookingDate.setHours(0, 0, 0, 0);
+        return bookingDate >= today;
+    });
+    bookings.splice(0, bookings.length, ...booking);
+    renderBooking();
+    saveToLocalstorage();
+    return bookings;
 }
-// const booking = expiredBookingRemove();
-// console.log(booking);
 viewBookingDateBtn.addEventListener("click", () => {
     datePicker.style.display = 'inline-block';
     datePicker.focus();
@@ -140,7 +153,6 @@ export function viewBookingForDate(date) {
     // todayBookedRoom.innerHTML = '';
     bookingsList.innerHTML = '';
     if (!bookingsDate.length) {
-        // bookingsList.innerHTML = '<div class = "text-muted"> No Bookings for this date.</div>';
         bookingsList.innerHTML = 'No Bookings for this date.';
     }
     else {

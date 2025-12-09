@@ -11,7 +11,8 @@ export interface Room {
     id: number;
     name: string;
     capacity: number;
-    cleaningTime?: number | string;
+    cleaningStartTime: string;
+    cleaningEndTime: string;
 }
 export declare let bookings: Booking[];
 export declare function saveBookingStorage(): void;

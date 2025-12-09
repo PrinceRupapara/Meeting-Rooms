@@ -29,4 +29,11 @@ export function isOverlapBooking(roomId, date, start, end, ignoreBookingId) {
         return (s1 < e2 && e1 > s2);
     });
 }
+export function isCleaning(bookingStart, bookingEnd, cleanStart, cleanEnd) {
+    const bStart = timeToMinutes(bookingStart);
+    const bEnd = timeToMinutes(bookingEnd);
+    const cStart = timeToMinutes(cleanStart);
+    const cEnd = timeToMinutes(cleanEnd);
+    return bStart < cEnd && bEnd > cStart;
+}
 //# sourceMappingURL=utils.js.map

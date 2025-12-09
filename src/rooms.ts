@@ -1,7 +1,8 @@
 import { editBooking, renderBooking } from "./bookings.js";
 import { bookingFilterDropdown, renderTodayBooking, selectRoom } from "./filter.js";
 import { type Booking, type Room, bookings, saveBookingStorage, saveRoomStorage } from "./store.js";
-import {type Rooms} from "./types.js";
+// import { type Rooms } from "./types";
+// import { isOverlapBooking } from "./utils";
 
 
 
@@ -15,7 +16,8 @@ const roomList = document.getElementById('roomList') as HTMLDivElement || null;
 const roomName = document.getElementById('roomName') as HTMLInputElement || null;
 const roomCap = document.getElementById('roomCap') as HTMLInputElement || null;
 const resetRoom = document.getElementById('resetRoom') as HTMLButtonElement || null;
-const cleaningTime = document.getElementById("cleaningTime") as HTMLInputElement || null;
+const cleaningStartTime = document.getElementById("cleaningStartTime") as HTMLInputElement || null;
+const cleaningEndTime = document.getElementById("cleaningEndTime") as HTMLInputElement || null;
 
 export const dropdown = document.getElementById("bookRoom") as HTMLSelectElement || null;
 const filterCapacity = document.getElementById("filterCapacity") as HTMLSelectElement || null;
@@ -48,7 +50,7 @@ export function renderRooms() {
                     <strong>${room.name}</strong><br/>
                     <span class="text-muted"> - Capacity: ${room.capacity}</span> 
                     
-                    <p class=""text-muted>- Cleaning Time: ${room.cleaningTime || "None"}</p>   
+                    <p class="fs-6">- Cleaning Time: ${room.cleaningStartTime} - ${room.cleaningEndTime}</p>   
                 </div>
                 <div>
                     <button type="button" class="btn btn-outline-success me-2 edit-room" data-id=${room.id}><i class="bi bi-pencil-square"></i></button>
@@ -92,10 +94,12 @@ function addRoomEventListeners() {
 }
 
 // Add a new room
-function addNewRoom(name: string,capacity : number ,cleaningTimeVal? : string | number ) {
+function addNewRoom(name, capacity, cleaningStartTime, cleaningEndTime) {
 
     const nameTrimmed = name.trim();
     const capNum = Number(capacity);
+    const cleanStart = String(cleaningStartTime);
+    const cleanEnd = String(cleaningEndTime);
     const existingRoom = rooms.find(room => room.name.toLowerCase() === name.toLowerCase());
 
     if (existingRoom) {
@@ -103,11 +107,12 @@ function addNewRoom(name: string,capacity : number ,cleaningTimeVal? : string | 
         alert(`'${name}' already exists. Please choose a different name.`);
         return;
     }
-    const newRoom : Room = {
+    const newRoom: Room = {
         id: nextId++,
         name: nameTrimmed,
         capacity: capNum,
-        cleaningTime: cleaningTimeVal ?? ""
+        cleaningStartTime: cleanStart,
+        cleaningEndTime: cleanEnd,
     };
 
     rooms.push(newRoom);
@@ -119,6 +124,7 @@ function addNewRoom(name: string,capacity : number ,cleaningTimeVal? : string | 
     saveToLocalstorage();
 
 }
+
 
 // Edit an existing room
 function editRooms(id: number) {
@@ -132,29 +138,38 @@ function editRooms(id: number) {
     }
     if (roomCap) {
         roomCap.value = String(room.capacity);
-    } if (cleaningTime) {
-        cleaningTime.value = String(room.cleaningTime ?? "");
+    } if (cleaningStartTime) {
+        cleaningStartTime.value = String(room.cleaningStartTime);
+    }
+    if (cleaningEndTime) {
+        cleaningEndTime.value = String(room.cleaningEndTime);
     }
     updateFormMode();
 
 
 }
 
-function saveRooms(id : number, name : string , capacity : number, cleaningTimeVal? : string|number) {
+function saveRooms(id: number, name: string, capacity: number, cleaningStartTime: string, cleaningEndTime: string) {
 
     const room = rooms.find(r => r.id === id);
-    if (!room) return;
+    if (!room) {
+
+        return;
+    }
     // if (room === -1) return;
     console.log(rooms);
-    console.log('room ', room);
-    console.log('id ', id);
+    console.log('room - ', room);
+    // console.log('id ', id);
     const nameTrimmed = name.trim();
     const capNum = Number(capacity);
+    const cleanStart = String(cleaningStartTime);
+    const cleanEnd = String(cleaningEndTime);
 
     room.name = nameTrimmed;
     room.capacity = capNum;
-    room.cleaningTime = cleaningTimeVal ?? "";
-    // console.log(room.cleaningTime);
+    room.cleaningStartTime = cleanStart ?? "";
+    room.cleaningEndTime = cleanEnd ?? "";
+
 
     console.log('Updated rooms : ', rooms);
     renderRooms();
@@ -235,6 +250,7 @@ function transferBookingToRoom(roomBookings: Booking[], id: number) {
         alert('No room selected. Transfer cancelled.');
         return false;
     }
+
     const selectedRoom = availableRooms.find(room => room.name.toLowerCase() === selectedRoomName.toLowerCase());
 
     if (!selectedRoom) {
@@ -370,11 +386,15 @@ if (forms) {
         e.preventDefault();
         const nameVal = roomName?.value ?? '';
         const capVal = roomCap?.value ?? '';
-        const cleaningTimeVal = cleaningTime?.value ?? '';
+        const cleaningStart = cleaningStartTime?.value ?? '';
+        const cleaningEnd = cleaningEndTime?.value ?? '';
+
         if (editingId === null) {
-            addNewRoom(nameVal , Number(capVal)  , cleaningTimeVal );
+            addNewRoom(nameVal, Number(capVal), cleaningStart, cleaningEnd);
+
+
         } else {
-            saveRooms(editingId, nameVal ,Number(capVal), cleaningTimeVal);
+            saveRooms(editingId, nameVal, Number(capVal), cleaningStart, cleaningEnd);
         }
     });
 }

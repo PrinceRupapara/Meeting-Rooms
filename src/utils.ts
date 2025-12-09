@@ -28,7 +28,19 @@ export function isOverlapBooking(roomId: number | string, date: string, start: s
         const e1 = timeToMinutes(end);
         const s2 = timeToMinutes(b.startTime);
         const e2 = timeToMinutes(b.endTime);
-        return (s1 < e2 && e1 > s2);
+        
+        return (s1 < e2 && e1 > s2 );
     });
 }
+
+export function isCleaning(bookingStart : string,bookingEnd : string ,cleanStart:string,cleanEnd:string ){
+     const bStart = timeToMinutes(bookingStart);
+    const bEnd = timeToMinutes(bookingEnd);
+    const cStart = timeToMinutes(cleanStart);
+    const cEnd = timeToMinutes(cleanEnd);
+
+    return bStart < cEnd && bEnd > cStart;
+}
+
+
 

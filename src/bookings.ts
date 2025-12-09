@@ -1,6 +1,6 @@
 import { bookingFilterDropdown, renderTodayBooking, selectRoom } from "./filter.js";
 import { loadDropDown, rooms, dropdown, saveToLocalstorage } from "./rooms.js";
-import { timeToMinutes, localTodayISO, isOverlapBooking } from "./utils.js";
+import { timeToMinutes, localTodayISO, isOverlapBooking, isCleaning } from "./utils.js";
 import { bookings, type Booking } from "./store.js";
 
 
@@ -163,6 +163,7 @@ bookingForm.addEventListener("submit", (e) => {
     const title = bookingTitle.value.trim() || 'untitled';
     const desc = bookingDesc.value.trim();
 
+
     const st = timeToMinutes(s_Time);
     const et = timeToMinutes(e_Time);
     const today = localTodayISO();
@@ -179,6 +180,20 @@ bookingForm.addEventListener("submit", (e) => {
     if (st >= et) {
         return alert('End time must be after start time.');
     }
+
+    const room = rooms.find(r => r.id === Number(roomId));
+
+
+        if (!room) {
+            alert("Room not found!");
+            return;
+        }
+        // console.log("clean : " , isCleaning(s_Time, e_Time, room.cleaningStartTime, room.cleaningEndTime));
+        if (isCleaning(s_Time, e_Time, room.cleaningStartTime, room.cleaningEndTime)) {
+            alert(`Room is cleaning betwen ${room.cleaningStartTime} to ${room.cleaningEndTime}`);
+            return;
+        }
+        
 
     if (st < timeToMinutes(business_start) || et > timeToMinutes(business_end)) {
         return alert("Booking allowed between 8:00 AM to 6:00 PM.");
@@ -197,7 +212,8 @@ bookingForm.addEventListener("submit", (e) => {
         if (isOverlapBooking(roomId, date, s_Time, e_Time, null)) {
             alert('This room is already booked!');
             return;
-        }
+        }        
+
         const newBooking: Booking = {
             id: nextBookingId++,
             roomId: Number(roomId),
@@ -207,12 +223,14 @@ bookingForm.addEventListener("submit", (e) => {
             title,
             description: desc
         };
+
         bookings.push(newBooking);
         bookingForm.reset();
+
         loadDropDown();
         renderBooking();
         bookingFilterDropdown();
-        selectRoom(roomId);// backup
+        selectRoom(Number(roomId));// backup
         bookingMode(false);
         renderTodayBooking();
         saveToLocalstorage();
@@ -223,25 +241,24 @@ bookingForm.addEventListener("submit", (e) => {
         const booking = bookings.find(b => b.id === bookingEditId);
         if (!booking) return;
 
-        console.log(bookings);
-        console.log(booking);
-        console.log(bookingEditId);
+        // // console.log(bookings);
+        // // console.log(booking);
+        // // console.log(bookingEditId);
 
-        // const roomID = Number(roomId);
-
-        booking.roomId =  Number(roomId);
+        booking.roomId = Number(roomId);
         booking.date = date;
         booking.startTime = s_Time;
         booking.endTime = e_Time;
         booking.title = title;
         booking.description = desc;
 
-        console.log("Updated Booking = ",booking);
-        
+        // console.log("Updated Booking = ", booking);
+
         bookingForm.reset();
         loadDropDown();
         bookingEditId = null;
         bookingMode(false);
+        bookingFilterDropdown();
         renderBooking();
         renderTodayBooking();
         saveToLocalstorage();
