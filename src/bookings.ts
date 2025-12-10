@@ -5,7 +5,6 @@ import { bookings, type Booking } from "./store.js";
 
 
 
-
 let bookingEditId: number | null = null;
 let nextBookingId: number = bookings.length ? Math.max(...bookings.map(b => b.id)) + 1 : 1;
 const bookingForm = document.getElementById('bookingForm') as HTMLFormElement || null;
@@ -31,7 +30,7 @@ if (!bookingsContainer) {
     bookingForm.parentNode?.appendChild(bookingsContainer);
 }
 
-export function renderBooking(roomId: string = ''): void {
+export function renderBooking(roomId?: string): void {
     if (!bookingsContainer) return;
 
     bookingsContainer.innerHTML = ' ';
@@ -103,6 +102,42 @@ function addBookingEventListners() {
     });
 }
 
+function  addNewBooking(booking : Booking){
+     const roomId = booking.roomId;
+    const date = booking.date;
+    const s_Time = booking.startTime;
+    const e_Time = booking.endTime;
+    const title = booking.title.trim() || 'untitled';
+    const desc = booking.description;
+
+     if (isOverlapBooking({roomId, date, startTime: s_Time, endTime: e_Time}, null)) {
+            alert('This room is already booked!');
+            return;
+        }        
+
+        const newBooking: Booking = {
+            id: nextBookingId++,
+            roomId: Number(roomId),
+            date,
+            startTime: s_Time,
+            endTime: e_Time,
+            title,
+            description: desc
+        };
+
+        bookings.push(newBooking);
+        bookingForm.reset();
+
+        loadDropDown();
+        renderBooking();
+       
+        bookingMode(false);
+        renderTodayBooking();
+        //  bookingFilterDropdown();
+        // selectRoom(Number(roomId)); // backup
+        saveToLocalstorage();
+}
+
 // Function to update booking form button and mode (editing or creating)
 export function bookingMode(isEditing: boolean) {
     const submitBtn = bookingForm.querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -133,6 +168,28 @@ export function editBooking(id: number) {
     bookingMode(true);
 }
 
+function saveBooking(id: number, book : Booking){
+    const booking = bookings.find(b => b.id === bookingEditId);
+        if (!booking) return;
+
+        booking.roomId = book.roomId;
+        booking.date = book.date;
+        booking.startTime = book.startTime;
+        booking.endTime = book.endTime;
+        booking.title = book.title;
+        booking.description = book.description;
+
+        console.log("updated Booking : " , bookings);
+
+        bookingForm.reset();
+        loadDropDown();
+        bookingEditId = null;
+        bookingMode(false);
+        bookingFilterDropdown();
+        renderBooking();
+        renderTodayBooking();
+        saveToLocalstorage();
+}
 // Function to delete a booking
 export function deleteBooking(id: number) {
     const booking = bookings.find(r => r.id === id);
@@ -188,8 +245,7 @@ bookingForm.addEventListener("submit", (e) => {
             alert("Room not found!");
             return;
         }
-        // console.log("clean : " , isCleaning(s_Time, e_Time, room.cleaningStartTime, room.cleaningEndTime));
-        if (isCleaning(s_Time, e_Time, room.cleaningStartTime, room.cleaningEndTime)) {
+        if (isCleaning({bookingStart: s_Time, bookingEnd: e_Time, cleanStart: room.cleaningStartTime, cleanEnd: room.cleaningEndTime})) {
             alert(`Room is cleaning betwen ${room.cleaningStartTime} to ${room.cleaningEndTime}`);
             return;
         }
@@ -209,61 +265,18 @@ bookingForm.addEventListener("submit", (e) => {
     }
 
     if (bookingEditId === null) {
-        if (isOverlapBooking(roomId, date, s_Time, e_Time, null)) {
+
+        addNewBooking({roomId: Number(roomId), date, startTime: s_Time, endTime: e_Time, title, description: desc, id: nextBookingId++} as Booking);
+    } else {
+        if (isOverlapBooking({roomId: Number(roomId), date, startTime: s_Time, endTime: e_Time}, bookingEditId)) {
             alert('This room is already booked!');
             return;
-        }        
-
-        const newBooking: Booking = {
-            id: nextBookingId++,
-            roomId: Number(roomId),
-            date,
-            startTime: s_Time,
-            endTime: e_Time,
-            title,
-            description: desc
-        };
-
-        bookings.push(newBooking);
-        bookingForm.reset();
-
-        loadDropDown();
-        renderBooking();
-        bookingFilterDropdown();
-        selectRoom(Number(roomId));// backup
-        bookingMode(false);
-        renderTodayBooking();
-        saveToLocalstorage();
-    } else {
-        if (isOverlapBooking(roomId, date, s_Time, e_Time, bookingEditId)) {
-            return;
         }
-        const booking = bookings.find(b => b.id === bookingEditId);
-        if (!booking) return;
-
-        // // console.log(bookings);
-        // // console.log(booking);
-        // // console.log(bookingEditId);
-
-        booking.roomId = Number(roomId);
-        booking.date = date;
-        booking.startTime = s_Time;
-        booking.endTime = e_Time;
-        booking.title = title;
-        booking.description = desc;
-
-        // console.log("Updated Booking = ", booking);
-
-        bookingForm.reset();
-        loadDropDown();
-        bookingEditId = null;
-        bookingMode(false);
-        bookingFilterDropdown();
-        renderBooking();
-        renderTodayBooking();
-        saveToLocalstorage();
+        saveBooking(bookingEditId , {roomId: Number(roomId), date, startTime: s_Time, endTime: e_Time, title, description: desc, id: bookingEditId} as Booking);
     }
 });
+
+
 
 // Reset booking form
 resetBooking.addEventListener("click", () => bookingForm.reset());

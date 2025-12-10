@@ -14,26 +14,26 @@ export function localTodayISO() {
     const local = new Date(now.getTime() - tzOffsetMs);
     return local.toISOString().slice(0, 10);
 }
-export function isOverlapBooking(roomId, date, start, end, ignoreBookingId) {
+export function isOverlapBooking(overlap, ignoreBookingId) {
     return bookings.some(b => {
-        if (Number(b.roomId) !== Number(roomId))
+        if (Number(b.roomId) !== overlap.roomId)
             return false;
-        if (b.date !== date)
+        if (b.date !== overlap.date)
             return false;
         if (ignoreBookingId !== null && b.id === ignoreBookingId)
             return false;
-        const s1 = timeToMinutes(start);
-        const e1 = timeToMinutes(end);
+        const s1 = timeToMinutes(overlap.startTime);
+        const e1 = timeToMinutes(overlap.endTime);
         const s2 = timeToMinutes(b.startTime);
         const e2 = timeToMinutes(b.endTime);
         return (s1 < e2 && e1 > s2);
     });
 }
-export function isCleaning(bookingStart, bookingEnd, cleanStart, cleanEnd) {
-    const bStart = timeToMinutes(bookingStart);
-    const bEnd = timeToMinutes(bookingEnd);
-    const cStart = timeToMinutes(cleanStart);
-    const cEnd = timeToMinutes(cleanEnd);
+export function isCleaning(clean) {
+    const bStart = timeToMinutes(clean.bookingStart);
+    const bEnd = timeToMinutes(clean.bookingEnd);
+    const cStart = timeToMinutes(clean.cleanStart);
+    const cEnd = timeToMinutes(clean.cleanEnd);
     return bStart < cEnd && bEnd > cStart;
 }
 //# sourceMappingURL=utils.js.map

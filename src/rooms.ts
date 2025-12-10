@@ -1,9 +1,6 @@
 import { editBooking, renderBooking } from "./bookings.js";
 import { bookingFilterDropdown, renderTodayBooking, selectRoom } from "./filter.js";
 import { type Booking, type Room, bookings, saveBookingStorage, saveRoomStorage } from "./store.js";
-// import { type Rooms } from "./types";
-// import { isOverlapBooking } from "./utils";
-
 
 
 export let rooms: Room[] = JSON.parse(localStorage.getItem('roomData') ?? '[]') || [];
@@ -41,7 +38,7 @@ export function renderRooms() {
         return;
     }
 
-    rooms.forEach(room => {
+    rooms.forEach((room)  => {
         const div = document.createElement('div');
         div.className = 'card p-2 mb-2 d-flex justify-content-between';
         div.innerHTML = `
@@ -94,17 +91,18 @@ function addRoomEventListeners() {
 }
 
 // Add a new room
-function addNewRoom(name, capacity, cleaningStartTime, cleaningEndTime) {
+function addNewRoom(room : Room) {
+    // Guard against missing name and normalize
+    const nameTrimmed = room.name;
+    const capNum = room.capacity;    
+    const cleanStart = room.cleaningStartTime;
+    const cleanEnd = room.cleaningEndTime;
 
-    const nameTrimmed = name.trim();
-    const capNum = Number(capacity);
-    const cleanStart = String(cleaningStartTime);
-    const cleanEnd = String(cleaningEndTime);
-    const existingRoom = rooms.find(room => room.name.toLowerCase() === name.toLowerCase());
+    const existingRoom = rooms.find(r => r.name.toLowerCase() === nameTrimmed.toLowerCase());
 
     if (existingRoom) {
         // If the room name already exists, show an alert and prevent adding the new room
-        alert(`'${name}' already exists. Please choose a different name.`);
+        alert(`'${room.name}' already exists. Please choose a different name.`);
         return;
     }
     const newRoom: Room = {
@@ -125,7 +123,6 @@ function addNewRoom(name, capacity, cleaningStartTime, cleaningEndTime) {
 
 }
 
-
 // Edit an existing room
 function editRooms(id: number) {
     const room = rooms.find(r => r.id === id);
@@ -137,7 +134,7 @@ function editRooms(id: number) {
         roomName.value = room.name;
     }
     if (roomCap) {
-        roomCap.value = String(room.capacity);
+        roomCap.value =room.capacity.toString();
     } if (cleaningStartTime) {
         cleaningStartTime.value = String(room.cleaningStartTime);
     }
@@ -149,21 +146,26 @@ function editRooms(id: number) {
 
 }
 
-function saveRooms(id: number, name: string, capacity: number, cleaningStartTime: string, cleaningEndTime: string) {
+function saveRooms(id: number, rm : Room) {
+const nameTrimmed = rm.name.trim();
+    const capNum = rm.capacity;
+    const cleanStart = rm.cleaningStartTime;
+    const cleanEnd = rm.cleaningEndTime;
+
 
     const room = rooms.find(r => r.id === id);
     if (!room) {
-
         return;
     }
-    // if (room === -1) return;
-    console.log(rooms);
-    console.log('room - ', room);
-    // console.log('id ', id);
-    const nameTrimmed = name.trim();
-    const capNum = Number(capacity);
-    const cleanStart = String(cleaningStartTime);
-    const cleanEnd = String(cleaningEndTime);
+
+     const existingRoom = rooms.find(r => r.name.toLowerCase() === nameTrimmed.toLowerCase() && r.id !== id);
+
+    if (existingRoom) {
+        alert(`'${room.name}' already exists. Please choose a different name.`);
+        return;
+    }    
+
+    
 
     room.name = nameTrimmed;
     room.capacity = capNum;
@@ -181,7 +183,6 @@ function saveRooms(id: number, name: string, capacity: number, cleaningStartTime
 }
 
 // Delete a room
-
 function deleteRooms(id: number) {
     const room = rooms.find(r => r.id === id);
     if (!room) return;
@@ -229,7 +230,6 @@ function deleteRooms(id: number) {
     console.log('Delete room id:', id);
     saveToLocalstorage();
 }
-
 
 function transferBookingToRoom(roomBookings: Booking[], id: number) {
     const room = rooms.find(r => r.id === id);
@@ -382,23 +382,25 @@ export function loadDropDown() {
 
 // Submit the room form
 if (forms) {
-    forms.addEventListener('submit', (e) => {
+    forms.addEventListener("submit", (e) => {
         e.preventDefault();
-        const nameVal = roomName?.value ?? '';
-        const capVal = roomCap?.value ?? '';
-        const cleaningStart = cleaningStartTime?.value ?? '';
-        const cleaningEnd = cleaningEndTime?.value ?? '';
-
         if (editingId === null) {
-            addNewRoom(nameVal, Number(capVal), cleaningStart, cleaningEnd);
-
-
-        } else {
-            saveRooms(editingId, nameVal, Number(capVal), cleaningStart, cleaningEnd);
+            addNewRoom({
+                name : roomName ? roomName.value : '',
+                capacity: roomCap ? roomCap.value : 10,
+                cleaningStartTime: cleaningStartTime ? cleaningStartTime.value : '',
+                cleaningEndTime: cleaningEndTime ? cleaningEndTime.value : ''
+            } as Room);
+        }else {
+            saveRooms(editingId, {
+                name : roomName ? roomName.value : '',
+                capacity: roomCap ? roomCap.value : 10,
+                cleaningStartTime: cleaningStartTime ? cleaningStartTime.value : '',
+                cleaningEndTime: cleaningEndTime ? cleaningEndTime.value : ''
+            } as Room);
         }
-    });
+})
 }
-
 export function searchRoom(query: string) {
     if (!roomList) return;
     if (!query) {

@@ -1,6 +1,6 @@
 import { bookingMode, renderBooking } from "./bookings.js";
 import { bookingFilterDropdown, expiredBookingRemove, renderTodayBooking } from "./filter.js";
-import { capacityFilter, renderRooms, loadDropDown, updateFormMode, searchRoom } from "./rooms.js";
+import { capacityFilter, renderRooms, loadDropDown, updateFormMode } from "./rooms.js";
 document.addEventListener('DOMContentLoaded', () => {
     renderRooms();
     capacityFilter();
@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("expired : ", updateBooking);
     renderBooking();
     updateFormMode();
-    bookingFilterDropdown();
     loadDropDown();
     bookingMode(false);
+    // bookingFilterDropdown();
 });
 //# sourceMappingURL=main.js.map

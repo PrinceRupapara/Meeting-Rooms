@@ -6,7 +6,7 @@ export interface Booking {
     startTime: string,
     endTime: string,
     title: string,
-    description?: string
+    description: string
 }
 
 export interface Room {
@@ -15,6 +15,20 @@ export interface Room {
     capacity: number,
     cleaningStartTime: string,
     cleaningEndTime: string,
+}
+
+export interface Overlap{
+    roomId: number,
+    date: string,
+    startTime: string,
+    endTime: string,
+}
+
+export interface Clean{
+    bookingStart : string,
+    bookingEnd : string ,
+    cleanStart:string,
+    cleanEnd:string
 
 }
 

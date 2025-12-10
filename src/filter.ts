@@ -106,7 +106,7 @@ filterBooking.addEventListener('change', () => {
     else {
         selectedRoomTitle.textContent = 'Choose a room to view its booking';
         selectedRoomBookings.innerHTML = '';
-        // renderBooking();
+        renderBooking();
     }
 });
 
@@ -166,7 +166,6 @@ export function expiredBookingRemove() : Booking[] {
     saveToLocalstorage();
     return bookings;    
 }
-
 
 
 viewBookingDateBtn.addEventListener("click", () => {

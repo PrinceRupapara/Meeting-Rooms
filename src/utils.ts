@@ -1,8 +1,8 @@
 // Utility Functions
-import { bookings, type Booking } from "./store.js";
+import { bookings, type Booking, type Clean, type Overlap } from "./store.js";
 
 
-export function timeToMinutes(t: string): number {
+export function timeToMinutes(t: string) {
     // const [hh, mm] = t.split(':').map(Number);
     // return hh * 60 + mm;
     const [hhStr, mmStr] = t.split(":");
@@ -12,20 +12,20 @@ export function timeToMinutes(t: string): number {
     return hh * 60 + mm;
 }
 
-export function localTodayISO(): string {
+export function localTodayISO(){
     const now = new Date();
     const tzOffsetMs = now.getTimezoneOffset() * 60000;
-    const local: any = new Date(now.getTime() - tzOffsetMs);
+    const local = new Date(now.getTime() - tzOffsetMs);
     return local.toISOString().slice(0, 10);
 }
 
-export function isOverlapBooking(roomId: number | string, date: string, start: string, end: string, ignoreBookingId: number | null): boolean {
+export function isOverlapBooking(overlap : Overlap, ignoreBookingId: number | null): boolean {
     return bookings.some(b => {
-        if (Number(b.roomId) !== Number(roomId)) return false;
-        if (b.date !== date) return false;
+        if (Number(b.roomId) !== overlap.roomId) return false;
+        if (b.date !== overlap.date) return false;
         if (ignoreBookingId !== null && b.id === ignoreBookingId) return false;
-        const s1 = timeToMinutes(start);
-        const e1 = timeToMinutes(end);
+        const s1 = timeToMinutes(overlap.startTime);
+        const e1 = timeToMinutes(overlap.endTime);
         const s2 = timeToMinutes(b.startTime);
         const e2 = timeToMinutes(b.endTime);
         
@@ -33,11 +33,11 @@ export function isOverlapBooking(roomId: number | string, date: string, start: s
     });
 }
 
-export function isCleaning(bookingStart : string,bookingEnd : string ,cleanStart:string,cleanEnd:string ){
-     const bStart = timeToMinutes(bookingStart);
-    const bEnd = timeToMinutes(bookingEnd);
-    const cStart = timeToMinutes(cleanStart);
-    const cEnd = timeToMinutes(cleanEnd);
+export function isCleaning(clean : Clean): boolean {
+     const bStart = timeToMinutes(clean.bookingStart);
+    const bEnd = timeToMinutes(clean.bookingEnd);
+    const cStart = timeToMinutes(clean.cleanStart);
+    const cEnd = timeToMinutes(clean.cleanEnd);
 
     return bStart < cEnd && bEnd > cStart;
 }
